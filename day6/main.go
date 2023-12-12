@@ -60,7 +60,7 @@ func parseLine(s, head string) []int {
 
 func main() {
 	start := time.Now()
-	b, err := os.ReadFile("in2.txt")
+	b, err := os.ReadFile("in2b.txt")
 	checkErr(err)
 
 	txt := string(b)
