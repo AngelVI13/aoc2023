@@ -14,27 +14,6 @@ func checkErr(err error) {
 	}
 }
 
-// greatest common divisor (GCD) via Euclidean algorithm
-func GCD(a, b int) int {
-	for b != 0 {
-		t := b
-		b = a % b
-		a = t
-	}
-	return a
-}
-
-// find Least Common Multiple (LCM) via GCD
-func LCM(a, b int, integers ...int) int {
-	result := a * b / GCD(a, b)
-
-	for i := 0; i < len(integers); i++ {
-		result = LCM(result, integers[i])
-	}
-
-	return result
-}
-
 func solutionPartOne(directions []Direction, pathMap map[string][]string) int {
 	steps := 0
 
@@ -67,7 +46,6 @@ func solutionPartTwo(directions []Direction, pathMap map[string][]string) int {
 	var stepsTillZ []int
 
 	for _, node := range startingNodes {
-		fmt.Print(node, " ")
 		directionIdx := 0
 		steps := 0
 		for {
@@ -76,21 +54,34 @@ func solutionPartTwo(directions []Direction, pathMap map[string][]string) int {
 			steps++
 			directionIdx++
 			if node[2] == 'Z' {
-				fmt.Print(steps)
 				stepsTillZ = append(stepsTillZ, steps)
 				break
 			}
 		}
-		fmt.Println()
-		// fmt.Println(node, steps)
 	}
 
 	sort.Slice(stepsTillZ, func(i, j int) bool {
 		return stepsTillZ[i] > stepsTillZ[j]
 	})
 
-	fmt.Println(stepsTillZ)
-	return LCM(stepsTillZ[0], stepsTillZ[1], stepsTillZ[1:]...)
+	// lcm - lowest common multiplier
+	lcm := stepsTillZ[0]
+	for {
+		allAreMultiple := true
+		for _, num := range stepsTillZ {
+			if lcm%num != 0 {
+				allAreMultiple = false
+				break
+			}
+		}
+
+		if allAreMultiple {
+			break
+		}
+
+		lcm += stepsTillZ[0]
+	}
+	return lcm
 }
 
 type Direction int
@@ -109,7 +100,6 @@ func main() {
 
 	lines := strings.Split(txt, "\n")
 	dirStr := lines[0]
-	fmt.Println(dirStr)
 	var directions []Direction
 
 	for _, char := range strings.TrimSpace(dirStr) {
@@ -137,8 +127,9 @@ func main() {
 		pathMap[node] = strings.Split(childrenStr, ", ")
 	}
 
-	// answer := solutionPartOne(directions, pathMap)
-	answer := solutionPartTwo(directions, pathMap)
-	fmt.Println("Answer:", answer)
+	answer := solutionPartOne(directions, pathMap)
+	fmt.Println("Answer PART1:", answer)
+	answer = solutionPartTwo(directions, pathMap)
+	fmt.Println("Answer PART2:", answer)
 	fmt.Println(time.Since(start))
 }
