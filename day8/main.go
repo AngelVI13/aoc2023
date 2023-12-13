@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"time"
 )
@@ -13,7 +14,28 @@ func checkErr(err error) {
 	}
 }
 
-func solution(directions []Direction, pathMap map[string][]string) int {
+// greatest common divisor (GCD) via Euclidean algorithm
+func GCD(a, b int) int {
+	for b != 0 {
+		t := b
+		b = a % b
+		a = t
+	}
+	return a
+}
+
+// find Least Common Multiple (LCM) via GCD
+func LCM(a, b int, integers ...int) int {
+	result := a * b / GCD(a, b)
+
+	for i := 0; i < len(integers); i++ {
+		result = LCM(result, integers[i])
+	}
+
+	return result
+}
+
+func solutionPartOne(directions []Direction, pathMap map[string][]string) int {
 	steps := 0
 
 	node := "AAA"
@@ -27,6 +49,48 @@ func solution(directions []Direction, pathMap map[string][]string) int {
 		}
 	}
 	return steps
+}
+
+var directionNames = map[Direction]string{
+	Left:  "L",
+	Right: "R",
+}
+
+func solutionPartTwo(directions []Direction, pathMap map[string][]string) int {
+	var startingNodes []string
+	for key := range pathMap {
+		if key[2] == 'A' {
+			startingNodes = append(startingNodes, key)
+		}
+	}
+
+	var stepsTillZ []int
+
+	for _, node := range startingNodes {
+		fmt.Print(node, " ")
+		directionIdx := 0
+		steps := 0
+		for {
+			directionIdx = directionIdx % len(directions)
+			node = pathMap[node][directions[directionIdx]]
+			steps++
+			directionIdx++
+			if node[2] == 'Z' {
+				fmt.Print(steps)
+				stepsTillZ = append(stepsTillZ, steps)
+				break
+			}
+		}
+		fmt.Println()
+		// fmt.Println(node, steps)
+	}
+
+	sort.Slice(stepsTillZ, func(i, j int) bool {
+		return stepsTillZ[i] > stepsTillZ[j]
+	})
+
+	fmt.Println(stepsTillZ)
+	return LCM(stepsTillZ[0], stepsTillZ[1], stepsTillZ[1:]...)
 }
 
 type Direction int
@@ -45,6 +109,7 @@ func main() {
 
 	lines := strings.Split(txt, "\n")
 	dirStr := lines[0]
+	fmt.Println(dirStr)
 	var directions []Direction
 
 	for _, char := range strings.TrimSpace(dirStr) {
@@ -72,7 +137,8 @@ func main() {
 		pathMap[node] = strings.Split(childrenStr, ", ")
 	}
 
-	answer := solution(directions, pathMap)
+	// answer := solutionPartOne(directions, pathMap)
+	answer := solutionPartTwo(directions, pathMap)
 	fmt.Println("Answer:", answer)
 	fmt.Println(time.Since(start))
 }
